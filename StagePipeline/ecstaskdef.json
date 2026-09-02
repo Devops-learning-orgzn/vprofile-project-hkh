@@ -1,0 +1,34 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "vprofile-app",
+      "image": "776648109966.dkr.ecr.us-east-1.amazonaws.com/vprofile-app-img-repo:latest",
+      "environment": [
+        {
+          "name": "DB_USERNAME",
+          "value": "admin"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "value": "admin123"
+        },
+        {
+          "name": "RABBITMQ_USERNAME",
+          "value": "test"
+        },
+        {
+          "name": "RABBITMQ_PASSWORD",
+          "value": "test"
+        },
+        {
+          "name": "APP_ADMIN_USER",
+          "value": "admin_vp"
+        },
+        {
+          "name": "APP_ADMIN_PASSWORD",
+          "value": "admin_vp"
+        }
+      ]
+    }
+  ]
+}
