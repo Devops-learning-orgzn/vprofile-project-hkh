@@ -117,8 +117,76 @@ pipeline {
         }
         stage('Deploy to ecs') {
             steps {
-                withAWS(credentials: 'awscreds', region: 'us-east-1') {
-                sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'db-creds',
+                usernameVariable: 'DB_USERNAME',
+                passwordVariable: 'DB_PASSWORD'
+            ),
+            usernamePassword(
+                credentialsId: 'rabbitmq-creds',
+                usernameVariable: 'RABBITMQ_USERNAME',
+                passwordVariable: 'RABBITMQ_PASSWORD'
+            ),
+            usernamePassword(
+                credentialsId: 'app-admin-creds',
+                usernameVariable: 'APP_ADMIN_USER',
+                passwordVariable: 'APP_ADMIN_PASSWORD'
+            )
+        ]) {
+            withAWS(credentials: 'awscreds', region: 'us-east-1') {
+                sh '''
+                    # Get current task definition
+                    aws ecs describe-task-definition \
+                        --task-definition vprofileapptask \
+                        --query taskDefinition > taskdef.json
+
+                    # Remove fields that cannot be supplied when registering a new revision
+                    jq 'del(
+                        .taskDefinitionArn,
+                        .revision,
+                        .status,
+                        .registeredAt,
+                        .registeredBy,
+                        .requiresAttributes,
+                        .compatibilities
+                    )' taskdef.json > taskdef-clean.json
+
+                    # Add environment variables securely using jq --arg flags
+                    jq \
+                        --arg dbu "$DB_USERNAME" \
+                        --arg dbp "$DB_PASSWORD" \
+                        --arg rbu "$RABBITMQ_USERNAME" \
+                        --arg rbp "$RABBITMQ_PASSWORD" \
+                        --arg au "$APP_ADMIN_USER" \
+                        --arg ap "$APP_ADMIN_PASSWORD" \
+                        '
+                        .containerDefinitions[0].environment = [
+                            {"name":"DB_USERNAME","value":$dbu},
+                            {"name":"DB_PASSWORD","value":$dbp},
+                            {"name":"RABBITMQ_USERNAME","value":$rbu},
+                            {"name":"RABBITMQ_PASSWORD","value":$rbp},
+                            {"name":"APP_ADMIN_USER","value":$au},
+                            {"name":"APP_ADMIN_PASSWORD","value":$ap}
+                        ]
+                        ' taskdef-clean.json > taskdef-final.json
+
+                    # Register new revision
+                    aws ecs register-task-definition \
+                        --cli-input-json file://taskdef-final.json
+
+                    # Get latest revision
+                    REVISION=$(aws ecs describe-task-definition \
+                        --task-definition vprofileapptask \
+                        --query 'taskDefinition.revision' \
+                        --output text)
+
+                    # Update service
+                    aws ecs update-service \
+                        --cluster ${cluster} \
+                        --service ${service} \
+                        --task-definition vprofileapptask:$REVISION
+                        '''
                 }
             }
         }
