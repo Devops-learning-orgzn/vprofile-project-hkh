@@ -117,10 +117,67 @@ pipeline {
         }
          stage('Deploy to ecs') {
           steps {
-            withAWS(credentials: 'awscreds', region: 'us-east-1') {
-            sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
-               }
-          }
+    withCredentials([
+        usernamePassword(
+            credentialsId: 'db-creds',
+            usernameVariable: 'DB_USERNAME',
+            passwordVariable: 'DB_PASSWORD'
+        ),
+        usernamePassword(
+            credentialsId: 'rabbitmq-creds',
+            usernameVariable: 'RABBITMQ_USERNAME',
+            passwordVariable: 'RABBITMQ_PASSWORD'
+        ),
+        usernamePassword(
+            credentialsId: 'app-admin-creds',
+            usernameVariable: 'APP_ADMIN_USER',
+            passwordVariable: 'APP_ADMIN_PASSWORD'
+        )
+    ]) {
+        withAWS(credentials: 'awscreds', region: 'us-east-1') {
+            sh '''
+                cat > taskdef.json << EOF
+                {
+                    "family": "vprofileapptask",
+                    "networkMode": "awsvpc",
+                    "requiresCompatibilities": ["FARGATE"],
+                    "cpu": "512",
+                    "memory": "1024",
+                    "containerDefinitions": [
+                        {
+                            "name": "vprofile-app",
+                            "image": "${appRegistry}:${BUILD_NUMBER}",
+                            "essential": true,
+                            "environment": [
+                                { "name": "DB_USERNAME", "value": "${DB_USERNAME}" },
+                                { "name": "DB_PASSWORD", "value": "${DB_PASSWORD}" },
+                                { "name": "RABBITMQ_USERNAME", "value": "${RABBITMQ_USERNAME}" },
+                                { "name": "RABBITMQ_PASSWORD", "value": "${RABBITMQ_PASSWORD}" },
+                                { "name": "APP_ADMIN_USER", "value": "${APP_ADMIN_USER}" },
+                                { "name": "APP_ADMIN_PASSWORD", "value": "${APP_ADMIN_PASSWORD}" }
+                            ]
+                        }
+                    ]
+                }
+                EOF
+
+                aws ecs register-task-definition \
+                    --cli-input-json file://taskdef.json
+
+                REVISION=$(aws ecs describe-task-definition \
+                    --task-definition vprofileapptask \
+                    --query 'taskDefinition.revision' \
+                    --output text)
+
+                aws ecs update-service \
+                    --cluster ${cluster} \
+                    --service ${service} \
+                    --task-definition vprofileapptask:$REVISION
+            '''
+        }
+    }
+}
+
         }
 
 
