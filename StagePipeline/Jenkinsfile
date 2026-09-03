@@ -181,8 +181,7 @@ pipeline {
             } 
         }
     }
-}
-post { 
+    post { 
         always { 
             slackSend( 
                 channel: '#devopscicd', 
@@ -191,3 +190,5 @@ post {
             ) 
         } 
 } 
+}
+
