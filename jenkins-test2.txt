@@ -24,7 +24,7 @@ pipeline {
         vprofileRegistry = "https://776648109966.dkr.ecr.us-east-1.amazonaws.com"
         cluster = "vproappstaging"
         service = "vproapptask-service-staging"
-        TASK_FAMILY = 'vproapptask'
+
 
     }
 
@@ -140,35 +140,7 @@ pipeline {
         stage('Deploy to ecs') {
             steps {
                 withAWS(credentials: 'awscreds', region: 'us-east-1') {
-                    script {
-                        env.TASK_DEF_ARN = sh(
-                            script: """
-                            IMAGE_URI=${appRegistry}:${BUILD_NUMBER}
-                            aws ecs describe-task-definition --task-definition ${TASK_FAMILY} --query taskDefinition > task-def.json
-                            jq 'del(
-                            .taskDefinitionArn,
-                            .revision,
-                            .status,
-                            .requiresAttributes,
-                            .compatibilities,
-                            .registeredAt,
-                            .registeredBy
-                            )' task-def.json > task-def-clean.json
-                            jq --arg IMAGE "\$IMAGE_URI" '.containerDefinitions[0].image=\$IMAGE' task-def-clean.json > task-def-new.json
-                            aws ecs register-task-definition --cli-input-json file://task-def-new.json --query "taskDefinition.taskDefinitionArn" --output text
-                            """,
-                            returnStdout: true
-                            ).trim()
-
-                            echo "New Revision: ${env.TASK_DEF_ARN}"
-                            sh """
-                            aws ecs update-service --cluster ${cluster} --service ${service} --task-definition ${TASK_DEF_ARN}
-                            """
-                            sh """
-                            aws ecs wait services-stable --cluster ${cluster} --services ${service}
-                            """
-                        }
-                }
+            sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
             }
         }
         stage('Verify Deployment') { 
@@ -182,6 +154,7 @@ pipeline {
         }
     }
 }
+
 post { 
         always { 
             slackSend( 
