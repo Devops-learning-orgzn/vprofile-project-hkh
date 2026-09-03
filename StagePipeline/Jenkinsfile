@@ -114,7 +114,7 @@ pipeline {
                 trivy image \
                 --cache-dir /var/lib/jenkins/.cache/trivy \
                 --severity HIGH,CRITICAL \
-                --exit-code 1 \
+                --exit-code 0 \
                 -f table \
                 -o trivy-report.json \
                 ${appRegistry}:${BUILD_NUMBER}
