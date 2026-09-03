@@ -113,6 +113,7 @@ pipeline {
 
                 trivy image \
                 --cache-dir /var/lib/jenkins/.cache/trivy \
+                --severity HIGH,CRITICAL \
                 -f table \
                 -o trivy-report.txt \
                 ${appRegistry}:${BUILD_NUMBER}
