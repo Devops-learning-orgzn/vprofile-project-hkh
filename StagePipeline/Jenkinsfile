@@ -105,6 +105,22 @@ pipeline {
                 }
             }
         }
+        stage('Trivy Scan') {
+            steps {
+                sh """
+                 trivy image \
+                -f table \
+                -o trivy-report.txt \
+                ${appRegistry}:${BUILD_NUMBER}
+                 """
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true
+                }
+            }
+        }
+
         stage('Upload App Image') {
           steps{
             script {
