@@ -108,7 +108,11 @@ pipeline {
         stage('Trivy Scan') {
             steps {
                 sh """
-                 trivy image \
+                mkdir -p /var/lib/jenkins/trivy-tmp
+                export TMPDIR=/var/lib/jenkins/trivy-tmp
+
+                trivy image \
+                --cache-dir /var/lib/jenkins/.cache/trivy \
                 -f table \
                 -o trivy-report.txt \
                 ${appRegistry}:${BUILD_NUMBER}
