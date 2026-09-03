@@ -116,7 +116,7 @@ pipeline {
                 --severity HIGH,CRITICAL \
                 --exit-code 1 \
                 -f table \
-                -o trivy-report.txt \
+                -o trivy-report.json \
                 ${appRegistry}:${BUILD_NUMBER}
                  """
             }
