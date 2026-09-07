@@ -116,6 +116,17 @@ Before executing the pipeline, log into your AWS Console and manually configure 
    * **ECS Service:** Configured to run and auto-scale instances of your task definition safely inside the cluster using a rolling update strategy.
 
 ---
+Example: 
+
+Log into your AWS Console (`us-east-1` region) and prepare these items before starting the pipeline:
+
+1. **Amazon ECR:** Create a private registry named `vprofile-app-img-repo` (Full path: `://amazonaws.com`).
+2. **Amazon ECS Setup:**
+   * Create an **ECS Cluster** named `vproappstaging`.
+   * Create an **ECS Task Definition** named `vproapptask`.
+   * Create an **ECS Service** named `vproapptask-service-staging` inside your cluster.
+
+---
 
 ## 📋 5. Pipeline Stages Walkthrough
 
