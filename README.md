@@ -63,7 +63,7 @@ A production-simulated, enterprise-grade CI/CD pipeline built to automate the in
 * **Code Quality & Testing:** SonarQube, Maven, Checkstyle
 * **Artifact Management:** Nexus Repository Manager
 * **Security & Compliance:** Trivy
-* **Alerts & Logging:** Slack Notifications
+* **Alerts ** Slack Notifications
 
 ---
 
