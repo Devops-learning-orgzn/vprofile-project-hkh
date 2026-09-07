@@ -67,7 +67,9 @@ Now, after the above steps validate all the services on the servers are running 
 
 Plugins: AWS SDK ,ECR, Docker pipeline.
 
-3. Store credentials on Jenkins server .
+3. Store credentials on Jenkins .
+
+aws_creds, nexuscreds, sonarcreds, slackcreds, git creds.
 
 
 
