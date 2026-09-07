@@ -34,42 +34,6 @@ Enforced automated guardrails inside the execution flow. The pipeline is archite
 Created declarative deployment routines using the AWS CLI. The pipeline dynamically updates Amazon ECS task definitions with newly pushed ECR tags, ensuring seamless rolling updates to web applications without manual container configurations.
 
 ---
-### TOOls Setup
-1. Server Provisioning & Configuration
-
-Create 3 servers on aws with the names (Jenkin server , Sonarqube, Server, Nexus server)
-
-Server instance type: c7i-flex.large for all
-
-server setup:
-
-Server 1 - Ubunut latest : Jenkins Server Setup - Refer jenkins_server_setup.docx file
-
-Server 2 - Ubunut latest: SonarQube Server (use sonarqube User Data script from github repo)
-
-Server 3 -  Amazon linux 2023 latest: Nexus Repository Manager (use nexus user data script)
-
-Note: Do the jenkins setup after creating the server, while for user data script use it while creating the ec2 instance.
-
-Security groups setup :
-
-Set Inbound traffic for Jenkins, sonarqube, nexus server
-
-Allow port 8080, 22 from anywhere for jenkins security group.
-
-Allow port 8081, 22 from anywhere for nexus security group.
-
-Allow port 80 ,22 from anywhere for sonarqube security group.
-
-Now, after the above steps validate all the services on the servers are running fine or not.
-
-2. Plugins requirement on Jenkins server.
-
-Plugins: AWS SDK ,ECR, Docker pipeline.
-
-3. Store credentials on Jenkins .
-
-aws_creds, nexuscreds, sonarcreds, slackcreds, git creds.
 
 
 

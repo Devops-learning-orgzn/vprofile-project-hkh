@@ -38,9 +38,9 @@ Go to **Manage Jenkins** ➡️ **Credentials** ➡️ **System** ➡️ **Globa
 
 ---
 
-## 🐳 3. Automated Server Scripts (User Data)
+## 🐳 3. User Data Scripts
 
-Paste these automation bash scripts inside the **User Data** section when launching your cloud instances to install Docker and run services instantly.
+Paste the **User Data script** form the userdata folder when launching your cloud instances.
 
 ### 🔹 SonarQube Server Setup
 use sonar-setup.sh file form the userdata folder.
