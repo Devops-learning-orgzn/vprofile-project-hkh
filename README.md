@@ -5,39 +5,44 @@ A production-simulated, enterprise-grade CI/CD pipeline built to automate the in
 
 ### Architecture diagram
 
-[ Developer ]
-      │
-      ▼ (Push Code)
- ┌──────────┐
- │  GitHub  │ ───────► (Webhook Trigger)
- └──────────┘
-      │
-      ▼
- ┌──────────┐
- │ Jenkins  │ ◄──────► [ Checkstyle / SonarQube ] (Quality Gates)
- └────┬─────┘
-      │
-      ├──────────────► [ Nexus Repository ]     (Artifact Storage)
-      │
-      ▼ (Multi-Stage Build)
- ┌──────────┐
- │  Docker  │ ───────► [ Trivy Scanner ]        (Vulnerability Check)
- └────┬─────┘
-      │
-      ▼ (Push Image)
- ┌──────────┐
- │ AWS ECR  │
- └────┬─────┘
-      │
-      ▼ (Dynamic Task Update via jq)
- ┌──────────┐
- │ AWS ECS  │ ───────► [ Production Live App ]
- └────┬─────┘
-      │
-      ▼ (Status Alert)
- ┌──────────┐
- │  Slack   │
- └──────────┘
+```text
+           [ Developer ]
+                 │
+                 ▼ (Pushes Code)
+         ┌───────────────┐
+         │    GitHub     │ ──────────┐ (Webhook)
+         └───────────────┘           │
+                                     ▼
+         ┌──────────────────────────────────────────────┐
+         │                 Jenkins CI                   │
+         └──────┬──────────────┬──────────────┬─────────┘
+                │              │              │
+                ▼              ▼              ▼
+         ┌───────────┐   ┌───────────┐   ┌───────────┐
+         │SonarQube  │   │   Nexus   │   │  Docker   │
+         │(Quality   │   │(Artifact  │   │(Container │
+         │ Gates)    │   │  Storage) │   │  Build)   │
+         └───────────┘   └───────────┘   └─────┬─────┘
+                                               │
+                                               ▼
+                                         ┌───────────┐
+                                         │   Trivy   │
+                                         │(Security  │
+                                         │  Scan)    │
+                                         └─────┬─────┘
+                                               │
+                                               ▼ (Validated Image)
+                                         ┌───────────┐
+                                         │  AWS ECR  │
+                                         └─────┬─────┘
+                                               │
+                                               ▼ (Update via jq)
+         ┌───────────┐                   ┌───────────┐
+         │   Slack   │ ◄──────────────── │  AWS ECS  │
+         │ (Alerts)  │  (Status Update)  │ (Deploy)  │
+         └───────────┘                   └───────────┘
+```
+
 
 
 
