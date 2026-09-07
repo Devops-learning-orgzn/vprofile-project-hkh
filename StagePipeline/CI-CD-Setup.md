@@ -43,30 +43,10 @@ Go to **Manage Jenkins** ➡️ **Credentials** ➡️ **System** ➡️ **Globa
 Paste these automation bash scripts inside the **User Data** section when launching your cloud instances to install Docker and run services instantly.
 
 ### 🔹 SonarQube Server Setup
-```bash
-#!/bin/bash
-sudo apt update -y
-sudo apt install docker.io -y
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo chmod 666 /var/run/docker.sock
-# Launch SonarQube on Port 9000
-docker run -d --name sonarqube -p 9000:9000 sonarqube:lts-community
-```
+use sonar-setup.sh file form the userdata folder.
 
 ### 🔹 Nexus Server Setup
-```bash
-#!/bin/bash
-sudo apt update -y
-sudo apt install docker.io -y
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo chmod 666 /var/run/docker.sock
-# Launch Nexus Repository on Port 8081
-docker run -d --name nexus -p 8081:8081 sonatype/nexus3
-```
-
----
+use nexus-setup.sh file form the userdata folder.
 
 ## ☁️ 4. AWS Cloud Infrastructure (Manual Configuration)
 
